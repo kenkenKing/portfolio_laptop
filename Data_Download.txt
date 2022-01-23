@@ -1,0 +1,2 @@
+"C:\Python\pythonw.exe" "C:\Automation_Trading\Data_Download.py"
+pause
