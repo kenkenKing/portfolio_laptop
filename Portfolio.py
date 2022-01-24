@@ -316,10 +316,13 @@ def min_CVaR_portfolio(portfolio,
             std_ = portfolio_std(temp_portfolio)
             target_port = temp_portfolio
             
-            # print(f'CVaR is {CVaR}, portfolio is {target_port}, portfolio return is {portfolio_mean(temp_portfolio)}, portfolio std is {portfolio_std(temp_portfolio)}')
-    print(pd.Series(data = target_port, index = portfolio))
+    print(f'CVaR min is {CVaR_min}\nportfolio is:\n{pd.Series(data = target_port, index = portfolio)}\nportfolio return is {portfolio_mean(temp_portfolio)}\nportfolio std is {portfolio_std(temp_portfolio)}\n\n\n\n')
     return target_port
 
+min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
+min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
+min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
+min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
 min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
 min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
 
