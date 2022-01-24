@@ -1,4 +1,8 @@
 IWM
+AAPL
+C
+JPM
+MSFT
 GE
 BAC
 TSLA

@@ -10,10 +10,10 @@ import os
 import numpy as np
 import datetime
 from scipy.optimize import minimize
-os.chdir(r'C:\Automation_Trading')
+os.chdir(r'D:\Razer\portfolio_laptop\portfolio_laptop')
 
-data_path = r'C:\Automation_Trading\Data'
-EQportfolio_path = r'C:\Automation_Trading\Equity_Portfolio.txt'
+data_path = 'Data'
+EQportfolio_path = 'Equity_Portfolio.txt'
 f = open(EQportfolio_path, "r")
 EQportfolio = f.read().split('\n')
 f.close()
@@ -33,6 +33,7 @@ def get_portfolio_stats(portfolio, stat_date = datetime.date.today().isoformat()
     data_stats = pd.read_csv(data_stats_path, index_col = 0)
     corr_mat = pd.read_csv(correlation_path, index_col = 0)
     IR = pd.read_csv('IR Data.csv', index_col = 0).loc[avai_date][IR_ticker]
+    IR = 0 if pd.isnull(IR) else IR
     cov_mat = pd.read_csv(cov_path, index_col = 0)
     
     close_price = data_stats.loc[EQportfolio]['close price']
@@ -40,17 +41,28 @@ def get_portfolio_stats(portfolio, stat_date = datetime.date.today().isoformat()
     std = data_stats.loc[EQportfolio]['annualized std of return']
     corr = corr_mat.loc[EQportfolio][EQportfolio]
     cov = cov_mat.loc[EQportfolio][EQportfolio]
-    return close_price, mean, std, corr, cov,IR
+    return close_price, mean, std, corr, cov, IR
 
-close_price, tick_mean, tick_std, tick_corr, tick_cov, IR = get_portfolio_stats(EQportfolio)
+close_price, tick_mean, tick_std, tick_corr, tick_cov, IR = get_portfolio_stats(EQportfolio, stat_date = '2021-05-21')
 nhi = 90
 rf = ( 1.0 / (1 - IR/100 * nhi/360.0) )**(1/nhi) - 1
 
+def portfolio_df(portfolio, weight):
+    return pd.Series(data=weight,index=portfolio)
+
 def portfolio_mean(weight):
+    
+    if type(weight) == np.ndarray:
+        return np.dot(weight, np.array(tick_mean))
+    
     weight_np = weight.to_numpy().reshape(len(weight),1)
     return weight_np.transpose().dot(tick_mean)[0]
 
 def portfolio_variance(weight):
+    
+    if type(weight) == np.ndarray:
+        return np.dot(np.dot(weight, np.array(tick_cov)), weight)
+    
     weight_np = weight.to_numpy().reshape(len(weight),1)
     return weight_np.transpose().dot(tick_cov.to_numpy()).dot(weight_np)[0,0]
 
@@ -266,12 +278,50 @@ def maximum_sharpe_ratio_portfolio(portfolio,
     
     weight = weights.x.tolist()
     target_df = pd.Series(data = weight, index = portfolio)
-
+    
     mean = portfolio_mean(target_df)
     var = portfolio_variance(target_df)
     std = portfolio_std(target_df)
     sr = portfolio_sr(target_df)
     return target_df, mean, var, std, sr
+
+def min_CVaR_portfolio(portfolio,
+                       sim_iterations=1000,
+                       N_samples=10000,
+                       alpha=0.95):
+    
+    port_size = len(portfolio) # get the length of portfolio
+    
+    CVaR_min = 10000
+    std_ = 10000
+    for i in range(sim_iterations):
+        num_generate = np.random.uniform(0,1,(N_samples, port_size)) # simulate
+    
+        def get_weights(simulated):
+            total = np.sum(simulated)
+            return simulated/total
+        weights = np.apply_along_axis(get_weights, 1, num_generate) # calc the weights from simulated
+        means = np.apply_along_axis(portfolio_mean, 1, weights) # mean of each weights
+        percentile_idx = int(means.shape[0]*(alpha)) # get the index of the alpha percentile portfolio w.r.t its mean
+        
+        CVaR_means = np.sort(means, kind='heapsort')[percentile_idx:] # the means need to be calculated in CVaR
+        VaR = CVaR_means[0] # get VaR
+        temp_portfolio = weights[np.where(means == VaR)[0].item()] # get the portfolio w.r.t VaR
+        CVaR_left = -1/(1-alpha)
+        CVaR_right = np.sum(CVaR_means)*(1/len(means))
+        CVaR = CVaR_left * CVaR_right
+        
+        if CVaR < CVaR_min and portfolio_std(temp_portfolio) < std_:
+            CVaR_min = CVaR
+            std_ = portfolio_std(temp_portfolio)
+            target_port = temp_portfolio
+            
+            # print(f'CVaR is {CVaR}, portfolio is {target_port}, portfolio return is {portfolio_mean(temp_portfolio)}, portfolio std is {portfolio_std(temp_portfolio)}')
+    print(pd.Series(data = target_port, index = portfolio))
+    return target_port
+
+min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
+min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
 
 #### show all
 def show_all_portfolio_stats(portfolio):
