@@ -12,7 +12,7 @@ jchen121@bu.edu
 
 PIMCO:
 jchen121@bu.edu
-@Acjh83489164
+!Acjh83489164
 
 Soc Gen:
 jchen121
@@ -20,7 +20,7 @@ jchen121
 
 Morgan Stanley:
 jchen121
-!Acjh83489164
+!@ILuvmom121
 
 Invesco:
 jchen121
@@ -32,7 +32,7 @@ jchen121
 
 UBS:
 jchen121@bu.edu
-!@#$Acjh83489164
+!@#$%ILuvmom121
 
 Business Information:
 jchen121@bu.edu
@@ -41,3 +41,19 @@ NA-1585316432
 BNP:
 jchen121@bu.edu
 !@ILuvmom121
+
+Fidelity:
+jchen121@bu.edu
+!Acjh83489164
+
+RBC:
+jchen121@bu.edu
+!Acjh83489164
+
+GTS:
+jchen121@bu.edu
+!@#ILuvmom121
+
+Blackstone:
+jchen121@bu.edu	
+!Acjh83489164
