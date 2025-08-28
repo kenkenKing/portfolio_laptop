@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon May 27 01:53:04 2019
-
-@author: cjh93
-"""
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -15,9 +9,7 @@ def dirac(n):
     y[0] = 1
     return y
 
-test_param = [100,100,0.2465753,0.25,0.045,0.02]
-test_param = [100,100,1, 0.025, 0.06 , 0.25 ,  0.8 , 0.09 ,  -0.25, 0]
-#              s   x  t  rf   nu0   volvol   kappa  theta   rho  div
+
 class HestonOption:
     def __init__(self, s, x, t, rf, nu0, volvol, kappa, theta, rho,div):
         self.s = s
@@ -153,20 +145,24 @@ class HestonOption:
         denominator = 2*ds
         return numerator/denominator
 
-testOption = HestonOption(test_param[0],test_param[1],test_param[2],test_param[3],test_param[4],
-test_param[5],test_param[6],test_param[7],test_param[8],test_param[9])
+if __name__ == '__main__':
+    test_param = [100,100,0.2465753,0.25,0.045,0.02]
+    test_param = [100,100,1, 0.025, 0.06 , 0.25 ,  0.8 , 0.09 ,  -0.25, 0]
+    #              s   x  t  rf   nu0   volvol   kappa  theta   rho  div
+    testOption = HestonOption(test_param[0],test_param[1],test_param[2],test_param[3],test_param[4],
+    test_param[5],test_param[6],test_param[7],test_param[8],test_param[9])
 
-#print(testOption)
-#print('The option has theoretical value:',testOption.value(1,10,250))
-#print('The option has simulated final underlying value:',testOption.S(100))
-#print('The numerical delta for the option is',testOption.numerical_delta(3,10,250,0.0001))
-#
-#plt.plot(range(100),testOption.simulate_S_path(100))
-#plt.show()
-#plt.plot(range(10000),testOption.simulate_sig_path(10000))
-#
-#start_time = time.time()
-#print('The option has MC value:',testOption.MCvalue(100,100000))
-#elapsed_time_secs = time.time() - start_time
-#msg = "Execution took: %s secs (Wall clock time)" % timedelta(seconds=round(elapsed_time_secs))
-#print(msg) 
+    print(testOption)
+    print('The option has theoretical value:',testOption.value(1,10,250))
+    print('The option has simulated final underlying value:',testOption.S(100))
+    print('The numerical delta for the option is',testOption.numerical_delta(3,10,250,0.0001))
+    
+    plt.plot(range(100),testOption.simulate_S_path(100))
+    plt.show()
+    plt.plot(range(10000),testOption.simulate_sig_path(10000))
+    
+    start_time = time.time()
+    print('The option has MC value:',testOption.MCvalue(100,5000))
+    elapsed_time_secs = time.time() - start_time
+    msg = "Execution took: %s secs (Wall clock time)" % timedelta(seconds=round(elapsed_time_secs))
+    print(msg) 

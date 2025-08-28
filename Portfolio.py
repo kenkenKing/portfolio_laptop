@@ -1,22 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 20 03:25:42 2021
-
-@author: cjh93
-"""
-
 import pandas as pd
 import os
 import numpy as np
 import datetime
 from scipy.optimize import minimize
-os.chdir(r'D:\Razer\portfolio_laptop\portfolio_laptop')
+import matplotlib.pyplot as plt
+
 
 data_path = 'Data'
 EQportfolio_path = 'Equity_Portfolio.txt'
 f = open(EQportfolio_path, "r")
 EQportfolio = f.read().split('\n')
 f.close()
+
+# to do: to add Black Litterman model
 
 def get_portfolio_stats(portfolio, stat_date = datetime.date.today().isoformat(), IR_ticker = '^IRX'):
     
@@ -236,7 +232,29 @@ def frontier_portfolio(portfolio,
         std = portfolio_std(target_df)
         sr = portfolio_sr(target_df)
         return target_df, mean, var, std, sr
+
+def frontier_portfolio_plot(portfolio,
+                            method = 'closed form',
+                            short_sell = True,
+                            upper_bound = 1.0,
+                            lower_bound = 0.0):
+    min_mean = portfolio_mean(minimum_variance_portfolio(portfolio)[0])
+    mean_grid = np.linspace(min_mean, 3*min_mean, num = 100, endpoint = True)
+    std_grid_func = np.vectorize(lambda m: frontier_portfolio(
+        portfolio=portfolio, target_mean=m, method=method, short_sell=short_sell, upper_bound=upper_bound, lower_bound=lower_bound)[3]
+        )
+    std_grid = std_grid_func(mean_grid)
     
+    plt.plot(std_grid, mean_grid, label="Frontier Portfolio")
+    plt.xlabel("standard deviation")
+    plt.ylabel("target_mean")
+    plt.title("Frontier Portfolio")
+    plt.legend()
+    plt.show()
+    print(mean_grid)
+    print(std_grid)
+    return 
+
 def maximum_sharpe_ratio_portfolio(portfolio,
                                    short_sell = True,
                                    upper_bound = 1.0,
@@ -285,49 +303,16 @@ def maximum_sharpe_ratio_portfolio(portfolio,
     sr = portfolio_sr(target_df)
     return target_df, mean, var, std, sr
 
-def min_CVaR_portfolio(portfolio,
-                       sim_iterations=1000,
-                       N_samples=10000,
-                       alpha=0.95):
-    
-    port_size = len(portfolio) # get the length of portfolio
-    
-    CVaR_min = 10000
-    std_ = 10000
-    for i in range(sim_iterations):
-        num_generate = np.random.uniform(0,1,(N_samples, port_size)) # simulate
-    
-        def get_weights(simulated):
-            total = np.sum(simulated)
-            return simulated/total
-        weights = np.apply_along_axis(get_weights, 1, num_generate) # calc the weights from simulated
-        means = np.apply_along_axis(portfolio_mean, 1, weights) # mean of each weights
-        percentile_idx = int(means.shape[0]*(alpha)) # get the index of the alpha percentile portfolio w.r.t its mean
-        
-        CVaR_means = np.sort(means, kind='heapsort')[percentile_idx:] # the means need to be calculated in CVaR
-        VaR = CVaR_means[0] # get VaR
-        temp_portfolio = weights[np.where(means == VaR)[0].item()] # get the portfolio w.r.t VaR
-        CVaR_left = -1/(1-alpha)
-        CVaR_right = np.sum(CVaR_means)*(1/len(means))
-        CVaR = CVaR_left * CVaR_right
-        
-        if CVaR < CVaR_min and portfolio_std(temp_portfolio) < std_:
-            CVaR_min = CVaR
-            std_ = portfolio_std(temp_portfolio)
-            target_port = temp_portfolio
-            
-    print(f'CVaR min is {CVaR_min}\nportfolio is:\n{pd.Series(data = target_port, index = portfolio)}\nportfolio return is {portfolio_mean(temp_portfolio)}\nportfolio std is {portfolio_std(temp_portfolio)}\n\n\n\n')
-    return target_port
-
-min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
-min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
-min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
-min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
-min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
-min_CVaR_portfolio(EQportfolio, sim_iterations=10000, N_samples=10000)
 
 #### show all
-def show_all_portfolio_stats(portfolio):
+def show_all_portfolio_stats(portfolio,
+                             method = 'closed form',
+                             short_sell = True,
+                             upper_bound = 1.0,
+                             lower_bound = 0.0):
+    
+    # to do: to plot mean and variance onto the frontier portfolio plot
+    
     try:
         shares = [1,27.522935,9.839372,0.407249]
         shares = pd.Series(data = shares, index = portfolio)
@@ -441,6 +426,33 @@ def show_all_portfolio_stats(portfolio):
     print('maximum sharpe ratio portfolio w/o short sell std:', msr_std)
     print('maximum sharpe ratio portfolio w/o short sell sr:', msr_sr)
     print()
+
+    min_mean = portfolio_mean(minimum_variance_portfolio(portfolio)[0])
+    mean_grid = np.linspace(min_mean, max(eq_wght_mean,mv_mean,mean_var_mean,msr_mean), num = 1000, endpoint = True)
+    std_grid_func = np.vectorize(lambda m: frontier_portfolio(
+        portfolio=portfolio, target_mean=m, method=method, short_sell=short_sell, upper_bound=upper_bound, lower_bound=lower_bound)[3]
+        )
+    std_grid = std_grid_func(mean_grid)
     
-show_all_portfolio_stats(EQportfolio)
+    plt.plot(std_grid, mean_grid, label="Frontier Portfolio")
+    
+    points_x = [eq_wght_std, mv_std , mean_var_std, msr_std]
+    points_y = [eq_wght_mean,mv_mean, mean_var_mean,msr_mean]
+    labels = ["Equally Weighted", "Min Var", "Mean Var", "Max Sharpe"]
+    colors = ['red', 'blue', 'green', 'yellow']
+    plt.scatter(points_x, points_y, color=colors, s=30, zorder=5)
+    
+    for px, py, label, c in zip(points_x, points_y, labels, colors):
+        plt.text(px, py, label, fontsize=10, ha="right", va="bottom")
+    
+    plt.xlabel("standard deviation")
+    plt.ylabel("target_mean")
+    plt.title("Frontier Portfolio")
+    plt.legend()
+    plt.show()
+
+
+if __name__ == '__main__':
+    show_all_portfolio_stats(EQportfolio)
+    # frontier_portfolio_plot(EQportfolio)
 

@@ -1,13 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jun  9 20:04:39 2019
-
-@author: cjh93
-"""
-
-#os.chdir("C:\Users\cjh93\Desktop\refinitiv practice")
 import numpy as np
-from numba import jit
 import time
 
 

@@ -1,16 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 17 00:46:04 2021
-
-@author: cjh93
-"""
-
 import pandas as pd
 import os
 
 EQ = pd.read_csv('Equity Data.csv', index_col = 0)
 IR = pd.read_csv('IR Data.csv', index_col = 0)
-data_dir = r'C:\Automation_Trading\Data'
+data_dir = r'Data'
 
 def get_equity_series(tickers, start_date, end_date):
     available_tickers = EQ.columns
