@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime
 import os
-os.chdir('C:\Automation_Trading')
+# os.chdir('C:\Automation_Trading')
 import matplotlib.pyplot as plt
 import BS
 import Tree
@@ -263,8 +263,8 @@ def get_IV(EQ, IR, valuation_date = datetime.date.today().isoformat(),
 
 #### execuction
 
-wk_dir = r'C:\Automation_Trading'
-os.chdir(wk_dir)
+# wk_dir = r'C:\Automation_Trading'
+# os.chdir(wk_dir)
 today_str = datetime.date.today().isoformat()
 EQ = pd.read_csv('Equity Data.csv', index_col = 0)
 IR = pd.read_csv('IR Data.csv', index_col = 0)

@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar  2 01:33:00 2021
-
-@author: cjh93
-"""
-
 import yfinance as yf
 import pandas as pd
 import datetime
@@ -39,8 +32,8 @@ def read_ticker(path):
     return (tickers_to_watch, tickers_to_watch_yf)
 
 #### change directroy
-wk_dir = r'C:\Automation_Trading'
-os.chdir(wk_dir)
+# wk_dir = r'C:\Automation_Trading'
+# os.chdir(wk_dir)
 
 ticker_path = 'TICKERS_TO_WATCH.txt'
 IR_path = 'IR.txt'
